@@ -6,7 +6,11 @@ const { engine } = require('express-handlebars');
 const app = express();
 const port = process.env.PORT || 3000;
 
+const route = require('./routes'); //import index.js automatically
+
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(express.urlencoded({ extended: true }));
 
 app.use(morgan('combined')); // or 'dev' in development
 
@@ -16,7 +20,7 @@ app.engine('hbs', engine({
 app.set('view engine', 'hbs');           // uses .handlebars extension
 app.set('views', path.join(__dirname, 'resources', 'views'));
 
-app.get('/', (req, res) => res.render('home'));
+route(app);
 
 app.listen(port, () =>
   console.log(`Server running at http://localhost:${port}`)
