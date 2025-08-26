@@ -7,6 +7,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const route = require('./routes'); //import index.js automatically
+const db = require('./config/db');
+
+// Connect to DB
+db.connect();
 
 app.use(express.static(path.join(__dirname, 'public')));
 
