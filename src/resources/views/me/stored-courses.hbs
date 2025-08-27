@@ -1,26 +1,85 @@
 <div class="mt-4">
-    <h2>Stored Courses</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Order</th>
-                <th>Title</th>
-                <th>Created At</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each courses}}
-            <tr>
-                <td>{{sum @index 1}}</td>
-               <td>{{this.name}}</td>
-               <td>{{this.createdAt}}</td>
-               <td>
-                    <a href="/courses/{{ this._id }}/edit" class="btn btn-link">Update</a>
-                    <a href="/courses/{{ this._id }}/delete" class="btn btn-link">Delete</a>
-               </td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
+  <h2>Stored Courses</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Title</th>
+        <th>Created At</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each courses}}
+        <tr>
+          <td>{{sum @index 1}}</td>
+          <td>{{this.name}}</td>
+          <td>{{this.createdAt}}</td>
+          <td>
+            <a href="/courses/{{this._id}}/edit" class="btn btn-link">Update</a>
+
+            <!-- Use Bootstrap 5 attributes and carry the id -->
+            <button
+              type="button"
+              class="btn btn-link"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal"
+              data-id="{{this._id}}"
+              data-name="{{this.name}}"
+            >Delete</button>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
 </div>
+
+{{!-- Delete Confirmation Modal (one global) --}}
+<div id="deleteModal" class="modal fade" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="courseName"></strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-delete-course" type="button" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{!-- Hidden form used to send DELETE via method-override --}}
+<form name="delete-course-form" method="POST">
+  <input type="hidden" name="_method" value="DELETE">
+</form>
+
+<script>
+// Ensure this runs after Bootstrap 5 bundle
+document.addEventListener('DOMContentLoaded', function () {
+  const deleteModal   = document.getElementById('deleteModal');
+  const deleteForm    = document.forms['delete-course-form'];
+  const btnDelete     = document.getElementById('btn-delete-course');
+  const courseNameEl  = document.getElementById('courseName');
+
+  let currentId = null;
+
+  // Bootstrap 5 modal event (no jQuery)
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    const trigger = event.relatedTarget;            // the button that opened the modal
+    currentId = trigger.getAttribute('data-id');         // store id for later
+    const courseName = trigger.getAttribute('data-name') || '';
+    courseNameEl.textContent = courseName;
+  });
+
+  btnDelete.addEventListener('click', function () {
+    if (!currentId) return;
+    deleteForm.action = '/courses/' + currentId + '?_method=DELETE';
+    deleteForm.submit();
+  });
+});
+</script>
