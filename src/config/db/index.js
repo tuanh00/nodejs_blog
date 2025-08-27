@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+mongoose.set('strictQuery', true);  // or false if you want the future v7 default
+
 async function connect() {
   try {
     await mongoose.connect("mongodb://localhost:27017/f8_education_dev", {
