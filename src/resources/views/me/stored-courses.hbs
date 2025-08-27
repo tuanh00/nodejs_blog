@@ -1,24 +1,45 @@
-<div class="mt-4">
-  <h2>Stored Courses</h2>
+<form class="mt-4" name="container-form" method="POST" action="/courses/handle-form-actions">
+  <div>
+    <h2>Stored Courses</h2>
+    <a href="/me/trash-courses" class="btn btn-link">Trash</a>  {{!-- <-- absolute path --}}
+  </div>
+
+  <div class="mt-4 d-flex align-items-center">
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" value="" id="checkbox-all">
+      <label class="form-check-label mx-2" for="checkbox-all">
+        Select All
+      </label>
+    </div>
+    <select id="bulk-actions" name="action" class="form-control form-control-sm w-50 w-md-25" required>
+      <option value="">-- Select an action --</option>
+      <option value="delete">Delete</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary btn-apply btn-sm mx-3">Apply</button>
+  </div>
   <table class="table">
     <thead>
       <tr>
-        <th>Order</th>
-        <th>Title</th>
-        <th>Created At</th>
-        <th></th>
+        <th >Order</th>
+        <th colspan="2">Title</th>
+        <th colspan="2">Created At</th>
       </tr>
     </thead>
     <tbody>
       {{#each courses}}
         <tr>
+          <td>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="courseIds[]" value="{{this._id}}">
+            </div>
+          </td>
           <td>{{sum @index 1}}</td>
           <td>{{this.name}}</td>
           <td>{{this.createdAt}}</td>
           <td>
             <a href="/courses/{{this._id}}/edit" class="btn btn-link">Update</a>
 
-            <!-- Use Bootstrap 5 attributes and carry the id -->
             <button
               type="button"
               class="btn btn-link"
@@ -29,12 +50,18 @@
             >Delete</button>
           </td>
         </tr>
+      {{else}}
+        <tr>
+          <td colspan="4" class="text-center">
+            You haven't created any courses yet.
+            <a href="/courses/create" class="btn btn-link">Create one</a>
+          </td>
+        </tr>
       {{/each}}
     </tbody>
   </table>
-</div>
+</form>
 
-{{!-- Delete Confirmation Modal (one global) --}}
 <div id="deleteModal" class="modal fade" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -53,32 +80,61 @@
   </div>
 </div>
 
-{{!-- Hidden form used to send DELETE via method-override --}}
 <form name="delete-course-form" method="POST">
   <input type="hidden" name="_method" value="DELETE">
 </form>
 
 <script>
-// Ensure this runs after Bootstrap 5 bundle
 document.addEventListener('DOMContentLoaded', function () {
   const deleteModal   = document.getElementById('deleteModal');
   const deleteForm    = document.forms['delete-course-form'];
+  var containerForm = document.forms['container-form'];
   const btnDelete     = document.getElementById('btn-delete-course');
   const courseNameEl  = document.getElementById('courseName');
-
   let currentId = null;
+  var checkboxAll = $('#checkbox-all');
+  var courseItemCheckbox = $('input[name="courseIds[]"]');
+  var btnApply = $('.btn-apply');
 
-  // Bootstrap 5 modal event (no jQuery)
+
+  checkboxAll.change(function() {
+    var isCheckedAll = $(this).prop('checked');
+    courseItemCheckbox.prop('checked', isCheckedAll);
+    renderApplyButtonState();               
+  });
+
+ 
+  btnApply.on('submit', function (e) {
+    if ($(this).prop('disabled') || !$('#bulk-actions').val()) {
+      e.preventDefault();
+      return;
+    }
+  });
+
+  function renderApplyButtonState() {
+    const isAnyChecked = courseItemCheckbox.filter(':checked').length;
+    console.log(isAnyChecked);
+    btnApply.prop('disabled', !isAnyChecked);
+  }
+
+  renderApplyButtonState();
+
+  //Each item toggle
+  courseItemCheckbox.change(function() {
+    var isCheckedAll = courseItemCheckbox.length === courseItemCheckbox.filter(':checked').length;
+    checkboxAll.prop('checked', isCheckedAll);
+    renderApplyButtonState(); // Update the apply button state
+  });
+
   deleteModal.addEventListener('show.bs.modal', function (event) {
-    const trigger = event.relatedTarget;            // the button that opened the modal
-    currentId = trigger.getAttribute('data-id');         // store id for later
-    const courseName = trigger.getAttribute('data-name') || '';
-    courseNameEl.textContent = courseName;
+    const trigger = event.relatedTarget;
+    currentId = trigger.getAttribute('data-id');
+    courseNameEl.textContent = trigger.getAttribute('data-name') || '';
   });
 
   btnDelete.addEventListener('click', function () {
     if (!currentId) return;
-    deleteForm.action = '/courses/' + currentId + '?_method=DELETE';
+    deleteForm.action = `/courses/${currentId}?_method=DELETE`; // soft delete
     deleteForm.submit();
   });
 });

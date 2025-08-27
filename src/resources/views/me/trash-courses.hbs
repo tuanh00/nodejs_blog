@@ -1,0 +1,101 @@
+<div class="mt-4">
+  <div>
+    <a href="/me/stored-courses" class="btn btn-link">Stored Courses</a>
+    <h2>Trash Courses</h2>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Title</th>
+        <th>Deleted At</th>  {{!-- optional: show deleted time --}}
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each courses}}
+        <tr>
+          <td>{{sum @index 1}}</td>
+          <td>{{this.name}}</td>
+          <td>{{this.deletedAt}}</td>  {{!-- or this.createdAt if you prefer --}}
+          <td>
+            <button type="button" class="btn btn-link btn-restore" data-id="{{this._id}}">Restore</button>
+
+            <button
+              type="button"
+              class="btn btn-link"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal"
+              data-id="{{this._id}}"
+              data-name="{{this.name}}"
+            >Permanently delete</button>
+          </td>
+        </tr>
+      {{else}}
+        <tr>
+          <td colspan="4" class="text-center">No deleted courses found</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+<div id="deleteModal" class="modal fade" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to permanently delete <strong id="courseName"></strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-delete-course" type="button" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form name="restore-course-form" method="POST">
+  <input type="hidden" name="_method" value="PATCH">
+</form>
+
+<form name="force-delete-course-form" method="POST">
+  <input type="hidden" name="_method" value="DELETE">
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Restore
+  document.querySelectorAll('.btn-restore').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const id = this.getAttribute('data-id');
+      const form = document.forms['restore-course-form'];
+      form.action = `/courses/${id}/restore?_method=PATCH`;
+      form.submit();
+    });
+  });
+
+  // Permanent delete
+  const deleteModal  = document.getElementById('deleteModal');
+  const btnDelete    = document.getElementById('btn-delete-course');
+  const courseNameEl = document.getElementById('courseName');
+  const forceForm    = document.forms['force-delete-course-form'];
+  let currentId = null;
+
+  deleteModal.addEventListener('show.bs.modal', function (event) {
+    const trigger = event.relatedTarget;
+    currentId = trigger.getAttribute('data-id');
+    courseNameEl.textContent = trigger.getAttribute('data-name') || '';
+  });
+
+  btnDelete.addEventListener('click', function () {
+    if (!currentId) return;
+    forceForm.action = `/courses/${currentId}/force?_method=DELETE`;
+    forceForm.submit();
+  });
+});
+</script>

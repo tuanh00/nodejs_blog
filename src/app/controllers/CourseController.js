@@ -42,11 +42,40 @@ class CourseController {
       .catch(next);
   }
 
-  //[DELETE] courses/:id
+  //[DELETE] courses/:id -> SOFT delete (move to Trash)
   delete(req, res, next) {
-    Course.deleteOne({ _id: req.params.id })
+    Course.delete({ _id: req.params.id })
       .then(() => res.redirect(`/me/stored-courses`))
       .catch(next);
   }
+
+   // [PATCH] /courses/:id/restore  -> RESTORE from Trash
+  restore(req, res, next) {
+    Course.restore({ _id: req.params.id })
+      .then(() => res.redirect('/me/stored-courses'))
+      .catch(next);
+  }
+
+  // [DELETE] /courses/:id/force -> PERMANENT delete
+  forceDelete(req, res, next) {
+    Course.deleteOne({ _id: req.params.id })
+      .then(() => res.redirect('/me/trash-courses'))
+      .catch(next);
+  }
+
+  // [POST] /courses/handle-form-actions
+  handleFormActions(req, res, next) {
+    switch (req.body.action) {
+      case 'delete':
+        Course.delete({ _id: { $in: req.body.courseIds } })
+          .then(() => res.redirect('/me/stored-courses'))
+          .catch(next);
+        break;
+      default:
+        res.json({ message: 'Invalid action' });
+        break;
+    }
+  }
 }
+
 module.exports = new CourseController();
