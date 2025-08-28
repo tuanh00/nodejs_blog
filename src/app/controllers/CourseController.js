@@ -20,6 +20,7 @@ class CourseController {
   store(req, res, next) {
     const formData = req.body;
     formData.img = `https://img.youtube.com/vi/${req.body.videoId}/hqdefault.jpg`;
+    Course.findOne({})
     const course = new Course(formData);
     course.save()
       .then(() => res.redirect(`/courses/${course.slug}`))

@@ -21,12 +21,11 @@
   <table class="table">
     <thead>
       <tr>
-        <th >Order </th>
-        <th colspan="2"> 
-            Title {{{ sortable 'name' _sort}}}
-        </th>
-        <th colspan="2">Created At {{{ sortable 'createdAt' _sort}}}
-</th>
+        <th class="text-center"></th>
+        <th> Order {{{ sortable '_id' _sort}}} </th>
+        <th> Title {{{ sortable 'name' _sort}}} </th>
+        <th> Created At {{{ sortable 'createdAt' _sort}}} </th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -37,12 +36,11 @@
               <input class="form-check-input" type="checkbox" name="courseIds[]" value="{{this._id}}">
             </div>
           </td>
-          <td>{{sum @index 1}}</td>
+          <td>{{this._id}}</td>
           <td>{{this.name}}</td>
           <td>{{this.createdAt}}</td>
           <td>
             <a href="/courses/{{this._id}}/edit" class="btn btn-link">Update</a>
-
             <button
               type="button"
               class="btn btn-link"

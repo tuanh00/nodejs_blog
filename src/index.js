@@ -55,6 +55,7 @@ app.engine('hbs', engine({
 }));             // defaults are fine
 app.set('view engine', 'hbs');           // uses .handlebars extension
 app.set('views', path.join(__dirname, 'resources', 'views'));
+app.locals.year = new Date().getFullYear();
 
 route(app);
 
