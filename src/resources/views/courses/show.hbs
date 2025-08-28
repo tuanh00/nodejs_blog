@@ -1,21 +1,26 @@
 <div class="mt-4">
-  <div class="row">
-    <div class="col-lg-3">
+  <div class="row g-4 align-items-start">
+    <!-- Button: only as wide as it needs -->
+    <div class="col-auto">
       <button class="btn btn-primary">Enroll</button>
     </div>
-    <div class="col-lg-3">
-      <h2>{{ course.name }}</h2>
-      <iframe
-        width="560"
-        height="315"
-        src="https://www.youtube.com/embed/{{ course.videoId }}"
-        title="YouTube video player"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen
-      ></iframe>
-      <p>{{ course.desc }}</p>
+
+    <!-- Content: take the rest of the row -->
+    <div class="col-12 col-md-9 col-lg-10">
+      <h2 class="h2 mb-3">{{course.name}}</h2>
+
+      <!-- Responsive video (fills column) -->
+      <div class="ratio ratio-16x9 mb-3">
+        <iframe
+          src="https://www.youtube.com/embed/{{course.videoId}}"
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+
+      <p class="lead mb-0">{{course.desc}}</p>
     </div>
   </div>
 </div>
