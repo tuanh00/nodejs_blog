@@ -4,7 +4,14 @@ const { multipleMongooseToObject } = require("../../util/mongoose");
 class MeController {
   //[GET] /me/stored-courses -> only NOT deleted (overrideMethods handles it)
   storedCourses(req, res, next) {
-    Course.find({})
+ 
+    let courseQuery = Course.find({});
+    
+    if ('_sort' in req.query) {
+      courseQuery.sort({ [req.query.column]: req.query.type });
+    }
+
+    courseQuery
       .then((courses) =>
         res.render("me/stored-courses", {
           courses: multipleMongooseToObject(courses),
